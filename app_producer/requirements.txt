@@ -1,0 +1,11 @@
+python-dotenv
+influxdb_client
+paho-mqtt
+MacTmp
+psutil
+mysql-connector-python 
+Flask-MQTT
+Flask
+pika
+Flask-Script
+gunicorn

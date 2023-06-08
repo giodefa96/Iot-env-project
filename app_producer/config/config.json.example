@@ -1,0 +1,17 @@
+{
+    "mqtt_settings":{
+        "TEMPLATES_AUTO_RELOAD": "True",
+        "MQTT_BROKER_URL": "",
+        "MQTT_BROKER_PORT": "",
+        "MQTT_USERNAME": "",
+        "MQTT_PASSWORD": "",
+        "MQTT_REFRESH_TIME": 1.0
+    },
+    "mysql_settings": {
+        "host": "",
+        "user": "",
+        "password": "",
+        "db": ""
+    }
+
+}
