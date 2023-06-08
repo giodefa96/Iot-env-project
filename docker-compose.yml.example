@@ -1,0 +1,125 @@
+version: "3.8"
+
+services:
+  app_producer:
+    build:
+        context: app_producer
+        dockerfile: Dockerfile_producer
+    image: app_producer-image
+    volumes:
+        - ./app_producer:/app_producer:rw
+    depends_on:
+      - mosquitto
+      - influxdb
+      - mysql
+      - rabbimqServer
+    networks:
+        - iot
+    links: 
+      - mysql
+      - rabbimqServer
+
+  app_consumer:
+    build:
+        context: app_consumer
+        dockerfile: Dockerfile_consumer
+    image: app_consumer-image
+    volumes:
+        - ./app_consumer:/app_consumer:rw
+    depends_on:
+      - mosquitto
+      - influxdb
+      - mysql
+      - rabbimqServer
+      - app_producer
+    networks:
+        - iot
+    links: 
+      - mysql
+      - rabbimqServer  
+  
+  rabbimqServer:
+    container_name: rabbitmqServer
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmqServer
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      RABBITMQ_ERLANG_COOKIE: ""
+      RABBITMQ_DEFAULT_USER: ""
+      RABBITMQ_DEFAULT_PASS: ""
+    networks:
+      - iot
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    restart: always
+    volumes:
+      - "./mosquitto/config:/mosquitto/config"
+      - "./mosquitto/log:/mosquitto/log"
+      - "./mosquitto/data/:/mosquitto/data"
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      - iot
+  
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: ''
+      MYSQL_USER: ''
+      MYSQL_PASSWORD: ''
+      MYSQL_ROOT_PASSWORD: ''
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - iot
+
+  influxdb:
+    image: influxdb
+    restart: always
+    ports:
+      - "8086:8086"
+    networks:
+      - iot
+    volumes:
+      - influxdb-data:/var/lib/influxdb
+    env_file:
+      - influxv2.env    
+  
+  telegraf:
+    image: telegraf
+    restart: always
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - mosquitto
+      - influxdb
+    networks:
+      - iot
+    env_file:
+      - influxv2.env    
+  
+  grafana:
+    image: grafana/grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - iot
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - influxdb
+
+networks:
+  iot:
+
+volumes:
+  influxdb-data:
+  grafana-data:
