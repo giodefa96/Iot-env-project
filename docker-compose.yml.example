@@ -23,6 +23,7 @@ services:
     build:
         context: app_consumer
         dockerfile: Dockerfile_consumer
+    restart: always
     image: app_consumer-image
     volumes:
         - ./app_consumer:/app_consumer:rw
